@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>영어 문장 블록 맞추기</title>
+  <style>
+    :root{--paper:#f7f4ee;--ink:#24302b;--muted:#68736d;--sage:#668275;--sage-dark:#45645a;--sage-soft:#e5ede8;--sand:#eee6d8;--success:#3f715b;--error:#a05d58}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 12% 8%,rgba(214,226,217,.78),transparent 32rem),radial-gradient(circle at 88% 92%,rgba(235,222,202,.76),transparent 30rem),var(--paper);color:var(--ink);font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}button{font:inherit}
+    .shell{min-height:100vh;display:grid;place-items:center;padding:32px 18px}.card{width:min(860px,100%);min-height:630px;padding:38px 44px 34px;background:rgba(255,255,255,.9);border:1px solid rgba(103,128,116,.2);border-radius:30px;box-shadow:0 24px 70px rgba(55,70,62,.12);backdrop-filter:blur(12px)}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}.eyebrow{margin:0 0 8px;color:var(--sage);font-size:12px;font-weight:800;letter-spacing:.15em}h1{margin:0;font-size:clamp(26px,4vw,38px);line-height:1.2;letter-spacing:-.04em}.counter{min-width:76px;padding:12px 16px;border-radius:18px;background:var(--sage-soft);color:var(--sage-dark);text-align:center}.counter strong{font-size:24px}.counter span{color:var(--muted);font-weight:700}
+    .progress{height:7px;margin:24px 0 30px;overflow:hidden;border-radius:999px;background:#edf0ed}.progress-fill{height:100%;border-radius:inherit;background:var(--sage);transition:width .35s ease}.instruction{display:flex;align-items:center;gap:17px;padding:20px 22px;border-radius:20px;background:#faf8f3;border:1px solid #e8e2d7}.number{flex:0 0 auto;display:grid;width:42px;height:42px;place-items:center;border-radius:14px;background:var(--sand);color:#6f5e48;font-weight:800}.instruction p{margin:0 0 6px;color:var(--muted);font-size:14px}.instruction h2{margin:0;font-size:clamp(19px,3vw,25px);line-height:1.45;letter-spacing:-.025em}
+    .answer{min-height:120px;display:grid;place-items:center;margin-top:24px;padding:20px;border:2px dashed #ccd6d0;border-radius:22px;background:#fbfcfb;transition:.2s}.answer.correct{border-style:solid;border-color:#8eb3a0;background:#f1f8f4}.answer.wrong{border-color:#c99590;background:#fff5f4;animation:shake .35s ease}.placeholder{margin:0;color:#94a09a;font-weight:650}.answer-blocks,.bank{display:flex;flex-wrap:wrap;justify-content:center;gap:11px}.period{align-self:end;font-size:30px;font-weight:800;line-height:1}
+    .block{min-height:52px;padding:12px 19px;border-radius:15px;border:1px solid #cbd5cf;background:#fff;color:var(--ink);font-size:clamp(17px,2.5vw,21px);font-weight:750;letter-spacing:-.015em;box-shadow:0 4px 0 #d9dfdb;cursor:pointer;transition:.15s}.block:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #d3dad5}.block:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #d3dad5}.block:focus-visible,.primary:focus-visible{outline:3px solid rgba(102,130,117,.3);outline-offset:3px}.selected{border-color:#9db1a7;background:var(--sage-soft);box-shadow:0 4px 0 #c1d0c8}.block:disabled{opacity:.28;cursor:default;box-shadow:none}
+    .feedback{min-height:27px;margin:14px 0 8px;text-align:center;color:var(--muted);font-size:14px;font-weight:700}.feedback.correct{color:var(--success)}.feedback.wrong{color:var(--error)}.bank{min-height:76px;align-items:center;padding:12px 0}.footer{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:22px;padding-top:22px;border-top:1px solid #e5e9e6}.footer p{margin:0;color:var(--muted);font-size:13px}.primary{border:0;border-radius:14px;padding:14px 22px;background:var(--sage-dark);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 5px 0 #314b43}.primary:hover{background:#3b5b51}.primary:active{transform:translateY(2px);box-shadow:0 3px 0 #314b43}
+    .finish{min-height:540px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.star{display:grid;width:82px;height:82px;place-items:center;margin-bottom:24px;border-radius:28px;background:var(--sand);color:#a47d46;font-size:38px;animation:pop .5s ease both}.finish-copy{margin:18px 0;color:var(--muted)}.score{display:flex;align-items:baseline;gap:5px;margin:8px 0 30px;color:var(--sage-dark)}.score strong{font-size:48px}.score span{font-weight:750}
+    @keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}70%{transform:translateX(6px)}}@keyframes pop{from{opacity:0;transform:scale(.65) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+    @media(max-width:640px){.shell{padding:12px;place-items:stretch}.card{min-height:calc(100vh - 24px);padding:26px 20px 22px;border-radius:24px}.header{align-items:center}.counter{min-width:66px;padding:9px 11px}.counter strong{font-size:20px}.instruction{align-items:flex-start;padding:17px}.number{width:36px;height:36px;border-radius:12px}.answer{min-height:132px;padding:15px}.block{min-height:48px;padding:10px 15px;border-radius:13px}.footer{align-items:flex-end}.footer p{max-width:190px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="shell"><section class="card" id="game" aria-labelledby="title"></section></main>
+  <script>
+    const questions=[
+      {translation:"우리 학교는 9시에 시작합니다.",blocks:["My school","begins","at 9 o'clock"],shuffled:["at 9 o'clock","My school","begins"]},
+      {translation:"나는 7시에 일어납니다.",blocks:["I","wake up","at 7 o'clock"],shuffled:["at 7 o'clock","wake up","I"]},
+      {translation:"나는 매일 학교에 갑니다.",blocks:["I","go to school","every day"],shuffled:["every day","I","go to school"]},
+      {translation:"그는 아침에 걸어서 학교에 갑니다.",blocks:["He","walks to school","in the morning"],shuffled:["in the morning","walks to school","He"]},
+      {translation:"그녀는 운동장에서 달립니다.",blocks:["She","runs","on the playground"],shuffled:["on the playground","She","runs"]},
+      {translation:"수업은 12시에 끝납니다.",blocks:["The class","ends","at 12 o'clock"],shuffled:["at 12 o'clock","The class","ends"]},
+      {translation:"나는 오늘 늦게 일어났습니다.",blocks:["I","woke up","late today"],shuffled:["late today","woke up","I"]},
+      {translation:"그녀는 매일 학교에 갑니다.",blocks:["She","goes to school","every day"],shuffled:["every day","She","goes to school"]},
+      {translation:"나는 어제 걸어서 학교에 갔습니다.",blocks:["I","walked to school","yesterday"],shuffled:["yesterday","walked to school","I"]},
+      {translation:"나는 운동장에서 달릴 것입니다.",blocks:["I","will run","on the playground"],shuffled:["on the playground","will run","I"]}
+    ];
+    const game=document.getElementById("game");let index=0,selected=[],available=[...questions[0].shuffled],status="playing",timer=null;
+    function esc(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
+    function shuffle(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}if(a.every((v,i)=>v===items[i]))[a[0],a[1]]=[a[1],a[0]];return a}
+    function render(){
+      if(status==="done"){game.className="card finish";game.innerHTML=`<div class="star" aria-hidden="true">★</div><p class="eyebrow">MISSION COMPLETE</p><h1 id="title">모든 문장을 완성했어요!</h1><p class="finish-copy">열 문장의 어순을 모두 정확하게 맞췄습니다.</p><div class="score"><strong>10</strong><span>/ 10 문장</span></div><button class="primary" onclick="restart()">처음부터 다시 풀기</button>`;return}
+      game.className="card";const q=questions[index];const answer=selected.length?`<div class="answer-blocks">${selected.map((b,i)=>`<button class="block selected" onclick="undo(${i})" aria-label="${esc(b)} 블록 취소">${esc(b)}</button>`).join("")}<span class="period">.</span></div>`:`<p class="placeholder">여기에 문장을 만들어 보세요</p>`;
+      const message=status==="correct"?"정답이에요! 문장을 멋지게 완성했어요.":status==="wrong"?"순서가 달라요. 블록을 다시 섞고 있어요.":selected.length?esc(selected.join(" "))+" …":"";
+      game.innerHTML=`<header class="header"><div><p class="eyebrow">WORD ORDER PRACTICE</p><h1 id="title">영어 문장 블록 맞추기</h1></div><div class="counter" aria-label="${questions.length}문제 중 ${index+1}번 문제"><strong>${index+1}</strong><span>/ ${questions.length}</span></div></header><div class="progress"><div class="progress-fill" style="width:${index/questions.length*100}%"></div></div><div class="instruction"><span class="number">${index+1}</span><div><p>아래 해석에 맞게 블록을 차례대로 눌러 보세요.</p><h2>${q.translation}</h2></div></div><div class="answer ${status}" aria-label="완성 중인 문장">${answer}</div><p class="feedback ${status}" role="status" aria-live="polite">${message}</p><div class="bank" aria-label="고를 수 있는 문장 블록">${available.map(b=>`<button class="block" onclick="choose('${b.replaceAll("'","\\'")}')" ${selected.includes(b)||status!=="playing"?"disabled":""}>${esc(b)}</button>`).join("")}</div><footer class="footer"><p>선택한 블록을 다시 누르면 취소할 수 있어요.</p>${status==="correct"?`<button class="primary" onclick="next()">${index===questions.length-1?"결과 보기":"다음 문장"}</button>`:""}</footer>`;
+    }
+    function choose(block){if(status!=="playing")return;selected.push(block);if(selected.length===questions[index].blocks.length){if(selected.every((b,i)=>b===questions[index].blocks[i]))status="correct";else{status="wrong";render();timer=setTimeout(()=>{selected=[];available=shuffle(questions[index].blocks);status="playing";render()},1100);return}}render()}
+    function undo(i){if(status!=="playing")return;selected.splice(i,1);render()}
+    function next(){if(index===questions.length-1){status="done"}else{index++;selected=[];available=[...questions[index].shuffled];status="playing"}render()}
+    function restart(){clearTimeout(timer);index=0;selected=[];available=shuffle(questions[0].blocks);status="playing";render()}
+    render();
+  </script>
+</body>
+</html>
