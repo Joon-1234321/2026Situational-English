@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리말 보고 영어 철자 쓰기</title>
+<style>
+:root{--ink:#26364a;--green:#477a68;--mint:#e5f1ec;--cream:#f7f6f1;--red:#a4514c;--gold:#b38d29}*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif}.wrap{width:min(880px,100%);margin:auto;padding:42px 18px 70px}
+header{margin-bottom:22px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.18em}h1{font-size:30px;margin:7px 0 5px;letter-spacing:-.04em}header p{margin:0;color:#7b8783}
+.card{background:#fff;border:1px solid #e3e8e4;border-radius:28px;padding:30px 36px 32px;box-shadow:0 18px 50px #4d5b5212;text-align:center}.progress{display:flex;justify-content:space-between;color:#718096;font-size:14px;font-weight:700}.progress strong{color:var(--green)}
+.track{height:6px;background:#edf0ee;border-radius:20px;margin:12px 0 38px;overflow:hidden}.track i{display:block;height:100%;background:var(--green);border-radius:20px;transition:width .3s}.prompt span{display:inline-block;background:var(--mint);color:var(--green);font-size:12px;font-weight:800;padding:6px 11px;border-radius:20px}.prompt h2{font-size:32px;margin:15px 0 30px;letter-spacing:-.035em}
+form{max-width:680px;margin:auto}.inputbox{position:relative}input{width:100%;height:64px;border:2px solid #cbd7d3;border-radius:16px;padding:0 58px 0 18px;font-size:22px;color:var(--ink);outline:none;background:#fafcfb}
+input:focus{border-color:#75a18f;box-shadow:0 0 0 4px #dcece566}button.submit{position:absolute;right:9px;top:9px;width:46px;height:46px;border:0;border-radius:12px;background:var(--green);color:#fff;font-size:23px;font-weight:bold;cursor:pointer}.guide{font-size:13px;color:#97a19e;margin:11px 0 0}
+.feedback{min-height:48px;display:flex;justify-content:center;align-items:center;gap:9px;font-weight:700;color:#71807b}.feedback.error{color:var(--red)}.feedback.success{color:var(--green)}.feedback b{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#edf3f0}
+.hint{margin:10px auto 4px;padding:17px;border-radius:17px;background:#f6f1e3;border:1px solid #eadfbf;max-width:680px}.hint strong{display:block;font-size:13px;color:#8e742e;margin-bottom:11px}.letters{display:flex;justify-content:center;flex-wrap:wrap;gap:7px}.letters span{min-width:35px;background:#fff;border:1px solid #dfd4b7;border-radius:10px;padding:8px 9px;font-size:18px;font-weight:800}.space{border:0!important;background:transparent!important;min-width:18px!important}.attempts{font-size:13px;color:#9aa29f;margin-top:18px}
+.finish{padding:50px 12px}.star{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#f5e9bd;color:var(--gold);font-size:44px}.finish small{color:var(--gold);font-weight:800;letter-spacing:.18em}.finish h2{font-size:30px;margin:9px 0}.finish p{color:#718096}.restart{border:0;background:var(--green);color:#fff;border-radius:13px;padding:13px 25px;font-size:15px;font-weight:800;margin-top:10px}
+@media(max-width:650px){.wrap{padding:24px 13px}.card{padding:23px 16px;border-radius:22px}h1{font-size:25px}.prompt h2{font-size:27px}input{height:60px;font-size:19px}.submit{top:7px!important}}
+</style></head><body><main class="wrap"><header><span class="eyebrow">ENGLISH SPELLING</span><h1>우리말 보고 영어 철자 쓰기</h1><p>영어 단어를 입력하고 Enter를 누르세요.</p></header><section class="card" id="app"></section></main>
+<script>
+const questions=[
+ {ko:"담임 선생님",answer:"homeroom teacher"},
+ {ko:"학급 친구",answer:"classmate"},
+ {ko:"가장 좋아하는",answer:"favorite"},
+ {ko:"과목",answer:"subject"},
+ {ko:"영어",answer:"English"},
+ {ko:"수학",answer:"math"},
+ {ko:"교실",answer:"classroom"},
+ {ko:"깨끗한",answer:"clean"},
+ {ko:"미술",answer:"art"},
+ {ko:"작은",answer:"small"}
+];
+let index=0,tries=0,locked=false;const app=document.querySelector("#app");
+function clean(s){return s.trim().toLowerCase().replace(/\s+/g," ")}
+function scrambled(){
+ const words=questions[index].answer.toLowerCase().split(" ");
+ return words.flatMap((word,wi)=>{let a=word.split("");for(let i=a.length-1;i>0;i--){const j=(i*5+index*3+tries+wi)%(i+1);[a[i],a[j]]=[a[j],a[i]]}if(a.join("")===word&&a.length>1)[a[0],a[1]]=[a[1],a[0]];return wi?[{space:true},...a]:a});
+}
+function render(message="영어 철자를 직접 입력해 보세요.",state=""){
+ const hint=tries>=3?'<div class="hint"><strong>💡 철자 힌트 — 글자의 순서를 바르게 맞춰 입력하세요.</strong><div class="letters">'+scrambled().map(x=>x.space?'<span class="space">＋</span>':'<span>'+x+'</span>').join("")+'</div></div>':"";
+ app.innerHTML='<div class="progress"><span>스펠링 타이핑</span><strong>'+(index+1)+' / '+questions.length+'</strong></div><div class="track"><i style="width:'+((index+1)/questions.length*100)+'%"></i></div><div class="prompt"><span>우리말</span><h2>'+questions[index].ko+'</h2></div><form id="answerForm" autocomplete="off"><div class="inputbox"><input id="answer" type="text" name="spelling_'+Date.now()+'" aria-label="영어 철자 입력" placeholder="영어로 입력하세요" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false"><button class="submit" type="submit" aria-label="정답 확인">↵</button></div><p class="guide">대소문자는 채점에 영향을 주지 않아요.</p></form><div class="feedback '+state+'"><b>'+(state==="error"?"↻":state==="success"?"✓":"✦")+'</b>'+message+'</div>'+hint+'<div class="attempts">현재 문제 오답 횟수: '+tries+'회</div>';
+ const input=document.querySelector("#answer");input.readOnly=true;setTimeout(()=>{input.readOnly=false;input.focus()},60);document.querySelector("#answerForm").onsubmit=check;
+}
+function check(e){e.preventDefault();if(locked)return;const value=clean(document.querySelector("#answer").value);if(!value)return;
+ if(value===clean(questions[index].answer)){locked=true;render("정답이에요! 다음 문제로 이동합니다. 🎉","success");setTimeout(()=>{if(index===questions.length-1)finish();else{index++;tries=0;locked=false;render()}},900)}
+ else{tries++;render(tries>=3?"다시 입력해 보세요. 아래 철자 힌트를 참고할 수 있어요.":"아쉬워요. 철자를 확인하고 다시 입력해 보세요.","error")}
+}
+function finish(){app.innerHTML='<div class="finish"><div class="star">★</div><small>ALL CLEAR</small><h2>10문제를 모두 완성했어요!</h2><p>영어 철자를 끝까지 잘 익혔어요.</p><button class="restart">처음부터 다시 하기</button></div>';document.querySelector(".restart").onclick=()=>{index=0;tries=0;locked=false;render()}}
+render();
+</script></body></html>

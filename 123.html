@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리말 보고 영어 문장 쓰기</title>
+<style>
+:root{--ink:#26364a;--green:#477a68;--mint:#e5f1ec;--cream:#f7f6f1;--red:#a4514c;--gold:#b38d29}*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif}.wrap{width:min(880px,100%);margin:auto;padding:42px 18px 70px}
+header{margin-bottom:22px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.18em}h1{font-size:30px;margin:7px 0 5px;letter-spacing:-.04em}header p{margin:0;color:#7b8783}
+.card{background:#fff;border:1px solid #e3e8e4;border-radius:28px;padding:30px 36px 32px;box-shadow:0 18px 50px #4d5b5212;text-align:center}.progress{display:flex;justify-content:space-between;color:#718096;font-size:14px;font-weight:700}.progress strong{color:var(--green)}
+.track{height:6px;background:#edf0ee;border-radius:20px;margin:12px 0 38px;overflow:hidden}.track i{display:block;height:100%;background:var(--green);border-radius:20px;transition:width .3s}
+.prompt span{display:inline-block;background:var(--mint);color:var(--green);font-size:12px;font-weight:800;padding:6px 11px;border-radius:20px}.prompt h2{font-size:28px;margin:15px 0 30px;letter-spacing:-.035em}
+form{max-width:700px;margin:auto}.inputbox{position:relative}input{width:100%;height:64px;border:2px solid #cbd7d3;border-radius:16px;padding:0 58px 0 18px;font-size:21px;color:var(--ink);outline:none;background:#fafcfb}
+input:focus{border-color:#75a18f;box-shadow:0 0 0 4px #dcece566}input.wrong{border-color:#c98580;background:#fff9f8;animation:shake .3s}button.submit{position:absolute;right:9px;top:9px;width:46px;height:46px;border:0;border-radius:12px;background:var(--green);color:white;font-size:23px;font-weight:bold;cursor:pointer}
+.guide{font-size:13px;color:#97a19e;margin:11px 0 0}.feedback{min-height:48px;display:flex;justify-content:center;align-items:center;gap:9px;font-weight:700;color:#71807b}.feedback.error{color:var(--red)}.feedback.success{color:var(--green)}
+.feedback b{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#edf3f0}.hint{margin:10px auto 4px;padding:17px;border-radius:17px;background:#f6f1e3;border:1px solid #eadfbf;max-width:700px}.hint strong{display:block;font-size:13px;color:#8e742e;margin-bottom:11px}.words{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}.words span{background:#fff;border:1px solid #dfd4b7;border-radius:11px;padding:8px 11px;font-size:16px;font-weight:700}.attempts{font-size:13px;color:#9aa29f;margin-top:18px}
+.finish{padding:50px 12px}.star{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#f5e9bd;color:var(--gold);font-size:44px}.finish small{color:var(--gold);font-weight:800;letter-spacing:.18em}.finish h2{font-size:30px;margin:9px 0}.finish p{color:#718096}.restart{border:0;background:var(--green);color:#fff;border-radius:13px;padding:13px 25px;font-size:15px;font-weight:800;margin-top:10px}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}@media(max-width:650px){.wrap{padding:24px 13px}.card{padding:23px 16px;border-radius:22px}h1{font-size:25px}.prompt h2{font-size:23px}input{height:60px;font-size:18px}.submit{top:7px!important}}
+</style></head>
+<body><main class="wrap"><header><span class="eyebrow">ENGLISH WRITING</span><h1>우리말 보고 영어 문장 쓰기</h1><p>영어 문장을 입력하고 Enter를 누르세요.</p></header><section class="card" id="app"></section></main>
+<script>
+const questions=[
+ {ko:"그녀는 학교에 늦는다.",answers:["She is late for school."]},
+ {ko:"그녀는 매일 학교에 늦는다.",answers:["She is late for school every day."]},
+ {ko:"나의 교실은 더럽다.",answers:["My classroom is dirty."]},
+ {ko:"나의 교실은 더럽지 않다.",answers:["My classroom is not dirty."]},
+ {ko:"그가 좋아하는 과목은 미술이다.",answers:["His favorite subject is art."]},
+ {ko:"그녀는 나의 학급 친구이다.",answers:["She is my classmate."]},
+ {ko:"그들은 나의 학급 친구들이다.",answers:["They are my classmates."]}
+];
+let index=0,tries=0,locked=false;const app=document.querySelector("#app");
+function clean(s){return s.trim().toLowerCase().replace(/[.!?]+$/,"").replace(/\s+/g," ")}
+function shuffledWords(){let a=questions[index].answers[0].replace(/[.!?]$/,"").split(" ");for(let i=a.length-1;i>0;i--){const j=(i*5+index*3+tries)%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function render(message="문장을 직접 입력해 보세요.",state=""){
+ const hint=tries>=3?'<div class="hint"><strong>💡 단어 힌트 — 순서를 생각하며 입력하세요.</strong><div class="words">'+shuffledWords().map(w=>'<span>'+w+'</span>').join("")+'</div></div>':"";
+ app.innerHTML='<div class="progress"><span>영작 타이핑</span><strong>'+(index+1)+' / '+questions.length+'</strong></div><div class="track"><i style="width:'+((index+1)/questions.length*100)+'%"></i></div><div class="prompt"><span>우리말</span><h2>'+questions[index].ko+'</h2></div><form id="answerForm" autocomplete="off"><div class="inputbox"><input id="answer" type="text" name="sentence_'+Date.now()+'" aria-label="영어 문장 입력" placeholder="영어 문장을 입력하세요" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text"><button class="submit" type="submit" aria-label="정답 확인">↵</button></div><p class="guide">마침표와 대소문자는 채점에 영향을 주지 않아요.</p></form><div class="feedback '+state+'"><b>'+(state==="error"?"↻":state==="success"?"✓":"✦")+'</b>'+message+'</div>'+hint+'<div class="attempts">현재 문제 오답 횟수: '+tries+'회</div>';
+ const input=document.querySelector("#answer");input.readOnly=true;setTimeout(()=>{input.readOnly=false;input.focus()},60);
+ document.querySelector("#answerForm").onsubmit=check;
+}
+function check(e){e.preventDefault();if(locked)return;const input=document.querySelector("#answer");const value=clean(input.value);if(!value)return;
+ if(questions[index].answers.some(a=>clean(a)===value)){locked=true;render("정답이에요! 다음 문제로 이동합니다. 🎉","success");setTimeout(()=>{if(index===questions.length-1)finish();else{index++;tries=0;locked=false;render()}},900)}
+ else{tries++;input.classList.add("wrong");render(tries>=3?"다시 입력해 보세요. 아래 단어 힌트를 참고할 수 있어요.":"아쉬워요. 같은 문장을 다시 입력해 보세요.","error")}
+}
+function finish(){app.innerHTML='<div class="finish"><div class="star">★</div><small>ALL CLEAR</small><h2>7문제를 모두 완성했어요!</h2><p>스스로 문장을 완성한 실력이 멋져요.</p><button class="restart">처음부터 다시 하기</button></div>';document.querySelector(".restart").onclick=()=>{index=0;tries=0;locked=false;render()}}
+render();
+</script></body></html>
