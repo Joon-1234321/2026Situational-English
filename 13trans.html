@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>영어 문장 변환하기</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:24px 14px;background:radial-gradient(circle at top,#fbfaf6,#f0eee6 62%,#e8e4da);font-family:Arial,"Noto Sans KR",sans-serif;color:#2e342d}
+.app{max-width:780px;margin:auto;background:#fff;border:1px solid #e5e1d8;border-radius:32px;overflow:hidden;box-shadow:0 18px 50px #68645b25}header{padding:28px 38px;background:#5f5a46;color:#fff}.tag{margin:0;color:#eee5c8;font-size:13px;font-weight:900;letter-spacing:.18em}h1{margin:7px 0 0;font-size:35px}header p:last-child{margin:8px 0 0;color:#ebe8dc}
+.body{padding:36px 38px}.center{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.emoji{font-size:58px;width:104px;height:104px;display:grid;place-items:center;border-radius:50%;background:#f3f0e4}h2{margin:20px 0 9px;font-size:29px}.note{max-width:470px;margin:0;color:#74736b;line-height:1.7}
+button{font:inherit;cursor:pointer}.start,.restart{margin-top:27px;border:0;border-radius:18px;padding:16px 38px;background:#ce7b55;color:#fff;font-size:18px;font-weight:900}.restart{background:#5f5a46}
+.top{display:flex;align-items:center;gap:16px;margin-bottom:28px}.bar{height:10px;flex:1;overflow:hidden;border-radius:99px;background:#ebe8df}.fill{height:100%;background:#ce7b55;transition:width .3s}.count{white-space:nowrap;color:#6e6b61;font-weight:900}
+.source{border-radius:23px;background:#f4f3ee;padding:22px;text-align:center}.source small,.instruction small{color:#7d7a70;font-weight:850}.english{margin:10px 0 0;color:#4b493d;font-size:26px;font-weight:900;line-height:1.4}.instruction{margin-top:15px;border:1px solid #ead9b8;border-radius:20px;background:#fff9ec;padding:18px;text-align:center}.korean{margin:8px 0 0;color:#8a5725;font-size:20px;font-weight:900;line-height:1.45;word-break:keep-all}
+.hint{margin-top:18px;padding:17px;border:1px solid #ebd08a;border-radius:19px;background:#fff8e7;text-align:center;color:#845514}.hint p{margin:0;font-weight:800}.words{margin-top:10px!important;font-size:17px;line-height:1.8;color:#a15e25;overflow-wrap:anywhere}
+form{margin-top:24px}label{display:block;margin-bottom:8px;color:#5c5b53;font-size:14px;font-weight:850}.row{display:flex;gap:9px}input{min-width:0;flex:1;height:60px;border:2px solid #d6d2c8;border-radius:18px;padding:0 18px;font-size:19px;font-weight:750;outline:none}input:focus{border-color:#8a765d;box-shadow:0 0 0 4px #8a765d20}.submit{width:67px;border:0;border-radius:18px;background:#ce7b55;color:#fff;font-size:28px;font-weight:900}
+.message{min-height:30px;margin-top:15px;text-align:center;font-weight:900}.right{color:#198463}.wrong{color:#d34e60}.tries{text-align:center;color:#919087;font-size:12px}.hidden{display:none!important}.party{font-size:74px}
+@media(max-width:560px){body{padding:0}.app{min-height:100vh;border:0;border-radius:0}header{padding:23px}.body{padding:25px 19px}h1{font-size:29px}.english{font-size:22px}.korean{font-size:18px}input{font-size:17px;padding:0 14px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><p class="tag">SENTENCE TRANSFORMER</p><h1>영어 문장 변환하기</h1><p>원래 문장을 지시에 맞게 바꿔서 입력하세요.</p></header>
+<section class="body">
+  <div id="intro" class="center"><div class="emoji">🔄</div><h2>문장을 바꿔 볼까요?</h2><p class="note">원래 영어 문장을 읽고 우리말 지시에 맞게 바꾼 문장을 입력하세요. 세 번 틀리면 섞인 단어 힌트가 나타납니다.</p><button class="start" onclick="start()">학습 시작</button></div>
+  <div id="game" class="hidden">
+    <div class="top"><div class="bar"><div id="fill" class="fill"></div></div><span id="count" class="count"></span></div>
+    <div class="source"><small>원래 문장</small><p id="source" class="english"></p></div>
+    <div class="instruction"><small>변환 지시</small><p id="instruction" class="korean"></p></div>
+    <div id="hint" class="hint hidden"><p>단어를 올바른 순서로 배열해 입력하세요.</p><p id="words" class="words"></p></div>
+    <form id="form" autocomplete="off"><label for="answer">바뀐 영어 문장 입력</label><div class="row"><input id="answer" type="text" placeholder="바뀐 문장을 입력하세요" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button class="submit" type="submit" aria-label="정답 확인">→</button></div></form>
+    <div id="message" class="message"></div><div id="tries" class="tries"></div>
+  </div>
+  <div id="finish" class="center hidden"><div class="party">🎉</div><h2>10문장을 모두 변환했어요!</h2><p class="note">주어, 시제, 시간 표현을 바르게 바꾸었습니다.</p><button class="restart" onclick="restart()">처음부터 다시 하기</button></div>
+</section>
+</main>
+<script>
+const questions=[
+ {s:"I like the lunch menu today.",i:"어제로 바꾸어 쓰세요.",a:"I liked the lunch menu yesterday."},
+ {s:"She played soccer yesterday.",i:"오늘 축구를 할 것이라고 바꾸어 쓰세요.",a:"She will play soccer today."},
+ {s:"We finished our English homework.",i:"주어를 나로 바꾸어 쓰세요.",a:"I finished my English homework."},
+ {s:"I will do my homework after school.",i:"어제 숙제를 했다고 바꾸어 쓰세요.",a:"I did my homework yesterday."},
+ {s:"He joined the movie club.",i:"그녀가 농구 동아리에 가입했다고 바꾸어 쓰세요.",a:"She joined the basketball club.",alt:["She joined a basketball club."]},
+ {s:"I like the school lunch.",i:"주어를 그로 바꾸어 쓰세요.",a:"He likes the school lunch."},
+ {s:"She will play basketball today.",i:"어제 농구를 했다고 바꾸어 쓰세요.",a:"She played basketball yesterday."},
+ {s:"She will finish her homework.",i:"숙제를 끝냈다고 바꾸어 쓰세요.",a:"She finished her homework."},
+ {s:"He did his homework yesterday.",i:"오늘 숙제를 할 것이라고 바꾸어 쓰세요.",a:"He will do his homework today."},
+ {s:"I joined the book club.",i:"그녀가 영화 동아리에 가입했다고 바꾸어 쓰세요.",a:"She joined the movie club.",alt:["She joined a movie club."]}
+];
+let index=0,mistakes=0,busy=false;const $=id=>document.getElementById(id);
+function normalize(s){return s.trim().toLowerCase().replace(/[.!?]+$/,"").replace(/\s+/g," ")}
+function shuffled(sentence){const a=sentence.replace(/[.!?]+$/,"").split(" ");for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.join("  ·  ")}
+function start(){$("intro").classList.add("hidden");$("game").classList.remove("hidden");show()}
+function show(){busy=false;mistakes=0;$("count").textContent=(index+1)+" / "+questions.length;$("fill").style.width=(index/questions.length*100)+"%";$("source").textContent=questions[index].s;$("instruction").textContent=questions[index].i;$("answer").value="";$("answer").name="transform-"+index+"-"+Date.now();$("message").textContent="";$("message").className="message";$("tries").textContent="";$("hint").classList.add("hidden");setTimeout(()=>$("answer").focus(),100)}
+function message(text,right){$("message").textContent=text;$("message").className="message "+(right?"right":"wrong")}
+$("form").addEventListener("submit",e=>{e.preventDefault();if(busy)return;const value=$("answer").value;if(!value.trim())return;const accepted=[questions[index].a,...(questions[index].alt||[])];if(accepted.some(answer=>normalize(value)===normalize(answer))){busy=true;message("정답이에요! 문장을 잘 바꿨어요. ✨",true);setTimeout(()=>{if(index===questions.length-1){$("game").classList.add("hidden");$("finish").classList.remove("hidden")}else{index++;show()}},800)}else{mistakes++;$("answer").value="";message("아쉬워요. 원래 문장과 지시를 다시 살펴보세요.",false);$("tries").textContent="오답 "+mistakes+"회";if(mistakes>=3){$("words").textContent=shuffled(questions[index].a);$("hint").classList.remove("hidden")}$("answer").focus()}});
+function restart(){index=0;$("finish").classList.add("hidden");$("game").classList.remove("hidden");show()}
+</script>
+</body></html>
