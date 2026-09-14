@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리말 보고 영어 문장 쓰기</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:24px 14px;background:radial-gradient(circle at top,#f9fbfc,#eaf0f3 62%,#e2e8eb);font-family:Arial,"Noto Sans KR",sans-serif;color:#28343a}
+.app{max-width:760px;margin:auto;background:#fff;border:1px solid #dce5e8;border-radius:32px;overflow:hidden;box-shadow:0 18px 50px #52636d24}header{padding:28px 38px;background:#3c5867;color:#fff}.tag{margin:0;color:#cfe8f2;font-size:13px;font-weight:900;letter-spacing:.18em}h1{margin:7px 0 0;font-size:35px}header p:last-child{margin:8px 0 0;color:#dce8ed}
+.body{padding:36px 38px}.center{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.emoji{font-size:58px;width:104px;height:104px;display:grid;place-items:center;border-radius:50%;background:#e8f1f5}h2{margin:20px 0 9px;font-size:29px}.note{max-width:470px;margin:0;color:#69777e;line-height:1.7}
+button{font:inherit;cursor:pointer}.start,.restart{margin-top:27px;border:0;border-radius:18px;padding:16px 38px;background:#dc7957;color:#fff;font-size:18px;font-weight:900}.restart{background:#3c5867}
+.top{display:flex;align-items:center;gap:16px;margin-bottom:28px}.bar{height:10px;flex:1;overflow:hidden;border-radius:99px;background:#e3e9ec}.fill{height:100%;background:#dc7957;transition:width .3s}.count{white-space:nowrap;color:#64737b;font-weight:900}
+.prompt{min-height:195px;border-radius:25px;background:#eef4f7;padding:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.prompt small{color:#708089;font-weight:800}.korean{margin:13px 0 0;color:#2d5163;font-size:28px;font-weight:900;line-height:1.45;word-break:keep-all}
+.hint{margin-top:18px;padding:17px;border:1px solid #efcd86;border-radius:19px;background:#fff8e7;text-align:center;color:#845514}.hint p{margin:0;font-weight:800}.words{margin-top:10px!important;font-size:17px;line-height:1.8;color:#a15e25;overflow-wrap:anywhere}
+form{margin-top:24px}label{display:block;margin-bottom:8px;color:#52636c;font-size:14px;font-weight:850}.row{display:flex;gap:9px}input{min-width:0;flex:1;height:60px;border:2px solid #c7d5db;border-radius:18px;padding:0 18px;font-size:19px;font-weight:750;outline:none}input:focus{border-color:#39758f;box-shadow:0 0 0 4px #39758f20}.submit{width:67px;border:0;border-radius:18px;background:#dc7957;color:#fff;font-size:28px;font-weight:900}
+.message{min-height:30px;margin-top:15px;text-align:center;font-weight:900}.right{color:#168c68}.wrong{color:#da4f62}.tries{text-align:center;color:#8a979c;font-size:12px}.hidden{display:none!important}.party{font-size:74px}
+@media(max-width:560px){body{padding:0}.app{min-height:100vh;border:0;border-radius:0}header{padding:23px}.body{padding:25px 19px}h1{font-size:29px}.korean{font-size:24px}input{font-size:17px;padding:0 14px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><p class="tag">KOREAN → ENGLISH</p><h1>우리말 보고 영어 문장 쓰기</h1><p>우리말 문장을 영어로 바르게 입력하세요.</p></header>
+<section class="body">
+  <div id="intro" class="center"><div class="emoji">⌨️</div><h2>영작 연습을 시작해요!</h2><p class="note">우리말을 읽고 영어 문장 전체를 입력하세요. 정답이 완성되면 자동으로 다음 문제로 넘어가며, 세 번 틀리면 단어 힌트가 나타납니다.</p><button class="start" onclick="start()">학습 시작</button></div>
+  <div id="game" class="hidden">
+    <div class="top"><div class="bar"><div id="fill" class="fill"></div></div><span id="count" class="count"></span></div>
+    <div class="prompt"><small>다음 문장을 영어로 쓰세요</small><p id="korean" class="korean"></p></div>
+    <div id="hint" class="hint hidden"><p>단어를 올바른 순서로 배열해 입력하세요.</p><p id="words" class="words"></p></div>
+    <form id="form" autocomplete="off"><label for="answer">영어 문장 입력</label><div class="row"><input id="answer" type="text" placeholder="영어 문장을 입력하세요" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text" enterkeyhint="done" aria-autocomplete="none" data-lpignore="true" data-1p-ignore="true"><button class="submit" type="submit" aria-label="정답 확인">→</button></div></form>
+    <div id="message" class="message"></div><div id="tries" class="tries"></div>
+  </div>
+  <div id="finish" class="center hidden"><div class="party">🎉</div><h2>6문장을 모두 완성했어요!</h2><p class="note">우리말 문장을 영어로 정확하게 표현했습니다.</p><button class="restart" onclick="restart()">처음부터 다시 하기</button></div>
+</section>
+</main>
+<script>
+const questions=[
+ {k:"우리는 페이스북에서 만난다.",answers:["We meet on Facebook.","We meet each other on Facebook."]},
+ {k:"그는 영상에서 운다.",answers:["He cries in the video.","He cries in a video."]},
+ {k:"그는 다섯 번 트윗했다.",answers:["He tweeted five times.","He tweeted 5 times."]},
+ {k:"한국인 유튜버들이 많이 있다.",answers:["There are many Korean YouTubers.","There are a lot of Korean YouTubers.","There are lots of Korean YouTubers."]},
+ {k:"그 아기는 자고 있다.",answers:["The baby is sleeping.","The baby is asleep."]},
+ {k:"나는 뉴욕 출신이 아니다.",answers:["I'm not from New York.","I am not from New York."]}
+];
+let index=0,mistakes=0,busy=false;const $=id=>document.getElementById(id);
+function normalize(s){return s.trim().toLowerCase().replace(/[’]/g,"'").replace(/[.!?]+$/,"").replace(/\s+/g," ")}
+function isCorrect(value){return questions[index].answers.some(a=>normalize(value)===normalize(a))}
+function shuffled(sentence){const original=sentence.replace(/[.!?]+$/,"").split(" ");let a=[...original];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}if(a.join(" ")===original.join(" "))a.reverse();return a.join("  ·  ")}
+function start(){$("intro").classList.add("hidden");$("game").classList.remove("hidden");show()}
+function show(){busy=false;mistakes=0;$("count").textContent=(index+1)+" / "+questions.length;$("fill").style.width=(index/questions.length*100)+"%";$("korean").textContent=questions[index].k;const input=$("answer");input.value="";input.name="english-"+index+"-"+Date.now()+"-"+Math.random().toString(36).slice(2);input.setAttribute("autocomplete","off");$("message").textContent="";$("message").className="message";$("tries").textContent="";$("hint").classList.add("hidden");setTimeout(()=>input.focus(),100)}
+function message(text,right){$("message").textContent=text;$("message").className="message "+(right?"right":"wrong")}
+function complete(){if(busy)return;busy=true;message("정답이에요! 잘 썼어요. ✨",true);setTimeout(()=>{if(index===questions.length-1){$("game").classList.add("hidden");$("finish").classList.remove("hidden")}else{index++;show()}},750)}
+$("answer").addEventListener("input",()=>{if(!busy&&isCorrect($("answer").value))complete()});
+$("form").addEventListener("submit",e=>{e.preventDefault();if(busy)return;const input=$("answer");if(!input.value.trim())return;if(isCorrect(input.value)){complete()}else{mistakes++;input.value="";message("아쉬워요. 다시 입력해 보세요.",false);$("tries").textContent="오답 "+mistakes+"회";input.name="english-"+index+"-"+Date.now()+"-"+Math.random().toString(36).slice(2);if(mistakes>=3){$("words").textContent=shuffled(questions[index].answers[0]);$("hint").classList.remove("hidden")}input.focus()}});
+function restart(){index=0;$("finish").classList.add("hidden");$("game").classList.remove("hidden");show()}
+</script>
+</body></html>
