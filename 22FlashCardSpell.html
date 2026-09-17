@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>영어 단어 플래시카드 · Famous 그룹 철자 쓰기</title>
+  <style>
+    :root {
+      --ink: #19324a;
+      --muted: #688097;
+      --navy: #3157a4;
+      --blue: #5a87ef;
+      --sky: #eaf3ff;
+      --yellow: #ffd96a;
+      --green: #23a77a;
+      --red: #e25e68;
+      --white: #fff;
+      --shadow: 0 24px 70px rgba(37, 72, 130, .18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      color: var(--ink);
+      font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255,255,255,.95) 0 5%, transparent 20%),
+        radial-gradient(circle at 88% 18%, rgba(255,217,106,.52) 0 4%, transparent 17%),
+        linear-gradient(145deg, #dcecff, #f3f8ff 48%, #e8f3ff);
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(760px, 100%);
+      text-align: center;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      font-weight: 800;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.15rem, 3vw, 1.55rem);
+      letter-spacing: -.03em;
+    }
+
+    .progress-text {
+      min-width: 88px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      color: var(--navy);
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 8px 26px rgba(49,87,164,.1);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      margin-bottom: 22px;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,.88);
+      border-radius: 999px;
+      background: rgba(255,255,255,.58);
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), #7e67dc);
+      transition: width .45s ease;
+    }
+
+    .card {
+      position: relative;
+      min-height: 430px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 46px 36px;
+      border: 4px solid rgba(255,255,255,.95);
+      border-radius: 34px;
+      background: rgba(255,255,255,.94);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+
+    .card:hover { transform: translateY(-3px); }
+    .card:active { transform: scale(.992); }
+    .card:focus-visible { box-shadow: var(--shadow), 0 0 0 5px rgba(90,135,239,.32); }
+    .card.spelling { cursor: default; }
+    .card.spelling:hover, .card.spelling:active { transform: none; }
+
+    .corner {
+      position: absolute;
+      top: 22px;
+      left: 25px;
+      font-size: .93rem;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .speaker {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      color: var(--navy);
+      background: var(--sky);
+      font-size: 1.35rem;
+      cursor: pointer;
+    }
+
+    .speaker:hover { background: #dceaff; }
+
+    .eyebrow {
+      margin-bottom: 18px;
+      color: var(--blue);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .main-text {
+      margin: 0;
+      font-size: clamp(3rem, 10vw, 5.7rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+      overflow-wrap: anywhere;
+    }
+
+    .main-text.meaning {
+      font-size: clamp(2.5rem, 8vw, 4.6rem);
+      word-break: keep-all;
+    }
+
+    .hint {
+      margin: 26px 0 0;
+      color: var(--muted);
+      font-size: clamp(.95rem, 2.5vw, 1.12rem);
+      font-weight: 700;
+    }
+
+    .tap-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .tap-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d5dfeb;
+    }
+
+    .tap-dot.done { background: var(--blue); }
+
+    .spelling-wrap {
+      width: min(480px, 100%);
+    }
+
+    .meaning-clue {
+      margin-bottom: 12px;
+      font-size: clamp(1.7rem, 6vw, 3rem);
+      font-weight: 900;
+      word-break: keep-all;
+    }
+
+    .letter-count {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .answer-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    #answerInput {
+      min-width: 0;
+      flex: 1;
+      height: 64px;
+      padding: 0 20px;
+      border: 3px solid #c9d9ed;
+      border-radius: 17px;
+      color: var(--ink);
+      background: #fbfdff;
+      font: 800 clamp(1.35rem, 4vw, 1.8rem)/1 system-ui, sans-serif;
+      text-align: center;
+      outline: none;
+      user-select: text;
+    }
+
+    #answerInput:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(90,135,239,.14); }
+    #answerInput.wrong { border-color: var(--red); animation: shake .25s linear; }
+    #answerInput.correct { border-color: var(--green); background: #effbf6; }
+
+    .check-btn, .restart-btn {
+      min-width: 98px;
+      border: 0;
+      border-radius: 17px;
+      padding: 0 18px;
+      color: var(--white);
+      background: var(--navy);
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .feedback {
+      min-height: 30px;
+      margin: 15px 0 0;
+      color: var(--red);
+      font-size: 1.05rem;
+      font-weight: 850;
+    }
+
+    .repeat-count {
+      display: inline-block;
+      margin: 0 0 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: var(--navy);
+      background: var(--sky);
+      font-size: .95rem;
+      font-weight: 900;
+    }
+
+    .keyboard {
+      display: grid;
+      gap: 7px;
+      margin-top: 16px;
+      user-select: none;
+    }
+
+    .key-row {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .key {
+      min-width: 0;
+      max-width: 49px;
+      height: 45px;
+      flex: 1;
+      border: 1px solid #c9d9ed;
+      border-radius: 10px;
+      color: var(--navy);
+      background: #fff;
+      box-shadow: 0 3px 0 #c4d3e4;
+      font: 900 .98rem/1 system-ui, sans-serif;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .key:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #c4d3e4;
+      background: var(--sky);
+    }
+
+    .key.wide { max-width: 78px; flex: 1.7; background: var(--sky); }
+    .key.clear { max-width: 90px; flex: 1.9; color: #b64f42; background: #fff4f0; font-size: .73rem; }
+    .keyboard-note { margin: 12px 0 0; color: var(--muted); font-size: .78rem; font-weight: 750; }
+
+    .instructions {
+      margin: 20px auto 0;
+      color: #526d85;
+      font-size: .98rem;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    .celebration {
+      min-height: 430px;
+      padding: 48px 30px;
+      border: 4px solid rgba(255,255,255,.95);
+      border-radius: 34px;
+      background: rgba(255,255,255,.95);
+      box-shadow: var(--shadow);
+    }
+
+    .trophy { font-size: 6rem; animation: bounce .8s ease infinite alternate; }
+    .celebration h2 { margin: 14px 0 10px; font-size: clamp(2.1rem, 7vw, 4rem); }
+    .celebration p { margin: 0 0 28px; color: var(--muted); font-size: 1.18rem; font-weight: 750; }
+    .restart-btn { min-height: 56px; padding: 0 28px; background: linear-gradient(135deg, var(--blue), #765fd7); }
+
+    .confetti {
+      position: fixed;
+      top: -18px;
+      width: 12px;
+      height: 20px;
+      border-radius: 3px;
+      animation: fall 2.8s linear forwards;
+      pointer-events: none;
+    }
+
+    @keyframes shake { 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+    @keyframes bounce { to { transform: translateY(-12px) rotate(3deg); } }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: .8; } }
+
+    @media (max-width: 560px) {
+      body { padding: 14px; }
+      .topbar { align-items: flex-start; }
+      .card, .celebration { min-height: 390px; padding: 42px 12px 34px; border-radius: 27px; }
+      .answer-row { flex-direction: column; }
+      .check-btn { min-height: 56px; }
+      .key-row { gap: 3px; }
+      .key { height: 43px; border-radius: 8px; font-size: .9rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <h1 class="title">✨ Click & Spell</h1>
+      <div class="progress-text" id="progressText">1 / 10</div>
+    </div>
+    <div class="progress-track" aria-label="학습 진행률">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <section id="stage" aria-live="polite"></section>
+    <p class="instructions" id="instructions">카드를 클릭할 때마다 영어 발음이 나와요.<br>네 번째 클릭 후 같은 철자를 6번 정확하게 써 보세요!</p>
+  </main>
+
+  <script>
+    const words = [
+      { word: "famous", meaning: "유명한" },
+      { word: "place", meaning: "장소" },
+      { word: "look", meaning: "보다 · ~해 보이다", meaningAnswers: ["보다 ~해 보이다"] },
+      { word: "cool", meaning: "멋진 · 시원한", meaningAnswers: ["멋진 시원한"] },
+      { word: "picture", meaning: "그림 · 사진", meaningAnswers: ["그림 사진"] },
+      { word: "funny", meaning: "재미있는 · 웃기는", meaningAnswers: ["재미있는 웃기는"] },
+      { word: "get", meaning: "얻다 · 받다 · ~되다", meaningAnswers: ["얻다 받다", "얻다 받다 ~되다"] },
+      { word: "popular", meaning: "인기 있는" },
+      { word: "boring", meaning: "지루한" },
+      { word: "influencer", meaning: "인플루언서" }
+    ];
+
+    const stage = document.getElementById("stage");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
+    const instructions = document.getElementById("instructions");
+    let index = 0;
+    let clickCount = 0;
+    let locked = false;
+    let correctRepeats = 0;
+    const REQUIRED_REPEATS = 6;
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 0.82;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function updateProgress() {
+      progressText.textContent = `${Math.min(index + 1, words.length)} / ${words.length}`;
+      progressFill.style.width = `${(index / words.length) * 100}%`;
+    }
+
+    function dots() {
+      return `<div class="tap-dots" aria-label="네 번 중 ${clickCount}번 클릭">
+        ${[1,2,3,4].map(n => `<span class="tap-dot ${n <= clickCount ? "done" : ""}"></span>`).join("")}
+      </div>`;
+    }
+
+    function renderCard() {
+      const item = words[index];
+      const showMeaning = clickCount % 2 === 1;
+      stage.innerHTML = `
+        <div class="card" id="card" tabindex="0" role="button" aria-label="플래시카드. 클릭하면 발음을 듣고 화면이 바뀝니다.">
+          <span class="corner">WORD ${String(index + 1).padStart(2, "0")}</span>
+          <button class="speaker" id="speaker" type="button" aria-label="영어 발음 다시 듣기">🔊</button>
+          <div class="eyebrow">${showMeaning ? "MEANING" : "ENGLISH"}</div>
+          <h2 class="main-text ${showMeaning ? "meaning" : ""}">${showMeaning ? item.meaning : item.word}</h2>
+          <p class="hint">${4 - clickCount}번 더 클릭하면 철자 쓰기!</p>
+          ${dots()}
+        </div>`;
+
+      const card = document.getElementById("card");
+      card.addEventListener("click", handleCardClick);
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleCardClick();
+        }
+      });
+      document.getElementById("speaker").addEventListener("click", event => {
+        event.stopPropagation();
+        speak(item.word);
+      });
+    }
+
+    function handleCardClick() {
+      if (locked) return;
+      speak(words[index].word);
+      clickCount += 1;
+      if (clickCount >= 4) renderSpelling();
+      else renderCard();
+    }
+
+    function renderSpelling() {
+      const item = words[index];
+      const letters = item.word.replace(/\s/g, "").length;
+      correctRepeats = 0;
+      stage.innerHTML = `
+        <div class="card spelling">
+          <span class="corner">SPELL ${String(index + 1).padStart(2, "0")}</span>
+          <button class="speaker" id="speaker" type="button" aria-label="영어 발음 다시 듣기">🔊</button>
+          <div class="spelling-wrap">
+            <div class="eyebrow">LISTEN & SPELL</div>
+            <div class="meaning-clue">${item.meaning}</div>
+            <p class="letter-count">알파벳 ${letters}글자</p>
+            <div class="repeat-count" id="repeatCount">정답 0 / ${REQUIRED_REPEATS}회</div>
+            <div class="answer-row">
+              <input id="answerInput" type="text" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="none" aria-autocomplete="none" data-lpignore="true" data-1p-ignore="true" aria-label="영어 철자 입력" placeholder="아래 알파벳을 누르세요" readonly>
+              <button class="check-btn" id="checkBtn" type="button">확인</button>
+            </div>
+            <div class="keyboard" id="keyboard" aria-label="화면 알파벳 키보드">
+              <div class="key-row"><button class="key" type="button" data-letter="q">Q</button><button class="key" type="button" data-letter="w">W</button><button class="key" type="button" data-letter="e">E</button><button class="key" type="button" data-letter="r">R</button><button class="key" type="button" data-letter="t">T</button><button class="key" type="button" data-letter="y">Y</button><button class="key" type="button" data-letter="u">U</button><button class="key" type="button" data-letter="i">I</button><button class="key" type="button" data-letter="o">O</button><button class="key" type="button" data-letter="p">P</button></div>
+              <div class="key-row"><button class="key" type="button" data-letter="a">A</button><button class="key" type="button" data-letter="s">S</button><button class="key" type="button" data-letter="d">D</button><button class="key" type="button" data-letter="f">F</button><button class="key" type="button" data-letter="g">G</button><button class="key" type="button" data-letter="h">H</button><button class="key" type="button" data-letter="j">J</button><button class="key" type="button" data-letter="k">K</button><button class="key" type="button" data-letter="l">L</button></div>
+              <div class="key-row"><button class="key clear" id="clearKey" type="button">전체 지우기</button><button class="key" type="button" data-letter="z">Z</button><button class="key" type="button" data-letter="x">X</button><button class="key" type="button" data-letter="c">C</button><button class="key" type="button" data-letter="v">V</button><button class="key" type="button" data-letter="b">B</button><button class="key" type="button" data-letter="n">N</button><button class="key" type="button" data-letter="m">M</button><button class="key wide" id="backspaceKey" type="button" aria-label="한 글자 지우기">⌫</button></div>
+            </div>
+            <p class="keyboard-note">휴대폰 자동완성이 나타나지 않는 화면 키보드입니다.</p>
+            <p class="feedback" id="feedback" aria-live="assertive"></p>
+          </div>
+        </div>`;
+
+      const input = document.getElementById("answerInput");
+      const checkBtn = document.getElementById("checkBtn");
+      document.getElementById("speaker").addEventListener("click", () => speak(item.word));
+      checkBtn.addEventListener("click", () => submitAnswer(false));
+      document.querySelectorAll("#keyboard [data-letter]").forEach(key => {
+        key.addEventListener("click", () => addLetter(key.dataset.letter));
+      });
+      document.getElementById("backspaceKey").addEventListener("click", eraseLetter);
+      document.getElementById("clearKey").addEventListener("click", clearAnswer);
+    }
+
+    function addLetter(letter) {
+      if (locked) return;
+      const input = document.getElementById("answerInput");
+      if (!input || input.value.length >= 30) return;
+      input.value += letter;
+      input.classList.remove("wrong");
+      document.getElementById("feedback").textContent = "";
+      if (isCorrect(input.value, words[index])) submitAnswer(true);
+    }
+
+    function eraseLetter() {
+      if (locked) return;
+      const input = document.getElementById("answerInput");
+      if (!input) return;
+      input.value = input.value.slice(0, -1);
+      input.classList.remove("wrong");
+      document.getElementById("feedback").textContent = "";
+    }
+
+    function clearAnswer() {
+      if (locked) return;
+      const input = document.getElementById("answerInput");
+      if (!input) return;
+      input.value = "";
+      input.classList.remove("wrong");
+      document.getElementById("feedback").textContent = "";
+    }
+
+    function normalize(value) {
+      return value.trim().toLowerCase().replace(/\s+/g, " ");
+    }
+
+    function normalizeMeaning(value) {
+      return value.trim().replace(/[\s,·/~]+/g, "");
+    }
+
+    function isCorrect(value, item) {
+      if (normalize(value) === normalize(item.word)) return true;
+      return (item.meaningAnswers || []).some(answer =>
+        normalizeMeaning(value) === normalizeMeaning(answer)
+      );
+    }
+
+    function submitAnswer(auto) {
+      if (locked) return;
+      const input = document.getElementById("answerInput");
+      if (isCorrect(input.value, words[index])) {
+        correctRepeats += 1;
+        document.getElementById("repeatCount").textContent = `정답 ${correctRepeats} / ${REQUIRED_REPEATS}회`;
+        input.classList.add("correct");
+        document.getElementById("feedback").style.color = "var(--green)";
+        input.value = "";
+        if (correctRepeats < REQUIRED_REPEATS) {
+          locked = true;
+          document.getElementById("feedback").textContent = `정답! ${REQUIRED_REPEATS - correctRepeats}번 더 입력하세요. ✨`;
+          setTimeout(() => {
+            input.classList.remove("correct");
+            locked = false;
+          }, auto ? 330 : 450);
+        } else {
+          locked = true;
+          document.getElementById("checkBtn").disabled = true;
+          document.getElementById("feedback").textContent = "6번 모두 정확해요! 🎉";
+          progressFill.style.width = `${((index + 1) / words.length) * 100}%`;
+          setTimeout(nextWord, auto ? 850 : 950);
+        }
+      } else {
+        input.classList.remove("wrong");
+        void input.offsetWidth;
+        input.classList.add("wrong");
+        document.getElementById("feedback").style.color = "var(--red)";
+        document.getElementById("feedback").textContent = input.value.trim() ? "조금 달라요. 다시 써 보세요!" : "철자를 입력해 주세요.";
+        input.value = "";
+      }
+    }
+
+    function nextWord() {
+      index += 1;
+      clickCount = 0;
+      locked = false;
+      correctRepeats = 0;
+      if (index >= words.length) showCelebration();
+      else {
+        updateProgress();
+        renderCard();
+      }
+    }
+
+    function showCelebration() {
+      progressText.textContent = `${words.length} / ${words.length}`;
+      progressFill.style.width = "100%";
+      instructions.hidden = true;
+      stage.innerHTML = `
+        <div class="celebration">
+          <div class="trophy">🏆</div>
+          <h2>모두 정답!</h2>
+          <p>10개 단어의 철자를 6번씩 정확하게 썼어요.<br>정말 잘했어요!</p>
+          <button class="restart-btn" id="restartBtn" type="button">처음부터 다시 하기</button>
+        </div>`;
+      document.getElementById("restartBtn").addEventListener("click", restart);
+      launchConfetti();
+    }
+
+    function launchConfetti() {
+      const colors = ["#5a87ef", "#ffd96a", "#23a77a", "#e25e68", "#896bd9"];
+      for (let i = 0; i < 70; i += 1) {
+        const piece = document.createElement("i");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = `${Math.random() * .9}s`;
+        piece.style.animationDuration = `${2.1 + Math.random() * 1.5}s`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 4500);
+      }
+    }
+
+    function restart() {
+      index = 0;
+      clickCount = 0;
+      locked = false;
+      correctRepeats = 0;
+      instructions.hidden = false;
+      updateProgress();
+      renderCard();
+    }
+
+    updateProgress();
+    renderCard();
+
+    document.addEventListener("keydown", event => {
+      if (!document.getElementById("answerInput") || locked) return;
+      if (/^[a-zA-Z]$/.test(event.key)) {
+        event.preventDefault();
+        addLetter(event.key.toLowerCase());
+      } else if (event.key === "Backspace") {
+        event.preventDefault();
+        eraseLetter();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        submitAnswer(false);
+      }
+    });
+  </script>
+</body>
+</html>
