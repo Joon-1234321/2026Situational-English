@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>영어 문장 빈칸 2개 완성하기</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1f2937;--muted:#64748b;--line:#dbe3ee;--accent:#2563eb;--accent2:#1d4ed8;--good:#15803d;--good-bg:#ecfdf3;--bad:#dc2626;--bad-bg:#fff1f2;--active:#fef3c7;--key:#fff;--key-shadow:#cbd5e1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:linear-gradient(180deg,#eef4ff 0,#f7f9fc 40%,#f5f7fb 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--ink);min-height:100vh}
+.wrap{width:min(980px,100%);margin:0 auto;padding:24px 18px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+h1{font-size:clamp(22px,3vw,34px);margin:0;font-weight:850;letter-spacing:-.02em}
+.count{white-space:nowrap;background:#e8efff;color:#1d4ed8;font-weight:800;padding:8px 12px;border-radius:999px}
+.bar{height:10px;background:#dfe7f2;border-radius:999px;overflow:hidden;margin-bottom:20px}.bar>div{height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#2563eb);transition:width .25s ease}
+.card{background:var(--card);border:1px solid #e6ebf2;border-radius:24px;padding:clamp(20px,4vw,36px);box-shadow:0 18px 50px rgba(30,64,175,.08)}
+.label{font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.02em;margin-bottom:8px}.korean{font-size:clamp(20px,3.2vw,29px);font-weight:750;line-height:1.5;margin-bottom:28px;color:#334155}
+.english{font-size:clamp(26px,4.2vw,41px);line-height:1.65;font-weight:800;text-align:center;word-break:keep-all;margin:8px 0 18px}
+.blank{display:inline-flex;min-width:100px;min-height:1.25em;align-items:flex-end;justify-content:center;padding:0 8px 2px;margin:0 4px;border-bottom:4px solid #94a3b8;color:#334155;letter-spacing:.04em;transition:.15s;border-radius:8px 8px 0 0}
+.blank.active{border-color:var(--accent);color:var(--accent2);background:var(--active);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.blank.wrong{color:var(--bad);border-color:var(--bad);background:var(--bad-bg);animation:shake .25s linear 1}.blank.correct{color:var(--good);border-color:var(--good);background:var(--good-bg)}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.step{text-align:center;font-size:15px;color:#64748b;font-weight:800;margin:2px 0 8px}.hint{text-align:center;min-height:28px;font-size:17px;font-weight:800;color:var(--muted);margin-bottom:18px}.hint.good{color:var(--good)}.hint.bad{color:var(--bad)}
+.keyboard{user-select:none;display:flex;flex-direction:column;gap:10px;margin-top:8px}.row{display:flex;justify-content:center;gap:8px}
+button.key{border:0;background:var(--key);color:#172033;border-radius:11px;min-width:clamp(34px,7.3vw,58px);height:clamp(48px,7.5vw,62px);font-size:clamp(19px,3vw,25px);font-weight:850;box-shadow:0 4px 0 var(--key-shadow),0 7px 16px rgba(15,23,42,.06);cursor:pointer;touch-action:manipulation}button.key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--key-shadow)}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:15px;flex-wrap:wrap}.action{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:800;cursor:pointer;background:#e8edf5;color:#334155}.action.primary{background:#dbeafe;color:#1d4ed8}
+.footer{display:flex;justify-content:center;margin-top:18px}.restart{border:0;background:transparent;color:#64748b;text-decoration:underline;cursor:pointer;font-weight:700;padding:8px}.done{text-align:center;padding:18px 0}.done .big{font-size:clamp(36px,8vw,70px);margin-bottom:10px}.done h2{font-size:clamp(28px,4vw,40px);margin:0 0 10px}.done p{font-size:19px;color:#475569;margin:0 0 20px}
+@media(max-width:560px){.wrap{padding:16px 10px 28px}.card{border-radius:18px;padding:20px 12px}.row{gap:5px}button.key{border-radius:9px;min-width:30px}.blank{min-width:80px}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><h1>빈칸 2개 완성하기</h1><div class="count" id="count">1 / 30</div></div>
+ <div class="bar"><div id="progress"></div></div>
+ <main class="card">
+  <div id="quiz">
+   <div class="label">우리말</div><div class="korean" id="korean"></div>
+   <div class="label">영어 문장</div><div class="english" id="sentence"></div>
+   <div class="step" id="step">첫 번째 빈칸을 입력하세요.</div>
+   <div class="hint" id="hint">아래 키보드의 알파벳을 눌러 두 빈칸을 완성하세요.</div>
+   <div class="keyboard" id="keyboard"></div>
+   <div class="actions"><button class="action primary" id="backBtn">← 한 글자 지우기</button><button class="action" id="clearBtn">현재 빈칸 지우기</button></div>
+  </div>
+  <div class="done" id="done" hidden><div class="big">🎉</div><h2>모두 완성했어요!</h2><p>30개의 문장을 모두 풀었습니다.<br>다시 풀면 두 빈칸의 조합이 달라집니다.</p><button class="action primary" id="againBtn">다른 빈칸으로 다시 풀기</button></div>
+ </main>
+ <div class="footer"><button class="restart" id="restartBtn">처음부터 다시 시작</button></div>
+</div>
+<script>
+const items = [
+  {ko:"나는 오늘 점심 메뉴가 마음에 든다.", sentence:"I like the lunch menu today.", candidates:["like","the","today"]},
+  {ko:"그녀는 어제 축구를 했다.", sentence:"She played soccer yesterday.", candidates:["played","yesterday"]},
+  {ko:"우리는 영어 숙제를 끝냈다.", sentence:"We finished our English homework.", candidates:["finished","our"]},
+  {ko:"나는 방과 후에 숙제를 할 것이다.", sentence:"I will do my homework after school.", candidates:["will","do","my","after"]},
+  {ko:"그는 영화 동아리에 가입했다.", sentence:"He joined the movie club.", candidates:["joined","the"]},
+  {ko:"나는 학교 급식이 좋다.", sentence:"I like the school lunch.", candidates:["like","the"]},
+  {ko:"그녀는 오늘 농구를 할 것이다.", sentence:"She will play basketball today.", candidates:["will","play","today"]},
+  {ko:"그녀는 숙제를 끝낼 것이다.", sentence:"She will finish her homework.", candidates:["will","finish","her"]},
+  {ko:"그는 어제 숙제를 했다.", sentence:"He did his homework yesterday.", candidates:["did","his","yesterday"]},
+  {ko:"나는 독서 동아리에 가입했다.", sentence:"I joined the book club.", candidates:["joined","the"]},
+  {ko:"그녀는 항상 페이스북을 한다.", sentence:"She is always on Facebook.", candidates:["is","always","on"]},
+  {ko:"이 틱톡커는 한국 출신이다.", sentence:"This Tiktoker is from Korea.", candidates:["is","from"]},
+  {ko:"그 개는 그녀의 영상에서 자고 있다.", sentence:"The dog is sleeping in her video.", candidates:["is","sleeping","in","her"]},
+  {ko:"우리는 틱톡에서 이야기를 나누었다.", sentence:"We chatted on Tiktok.", candidates:["chatted","on"]},
+  {ko:"여행 브이로그가 많이 있다.", sentence:"There are many travel vlogs.", candidates:["There","are","many"]},
+  {ko:"그녀는 인스타그램을 하지 않는다.", sentence:"She is not on Instagram.", candidates:["is","not","on"]},
+  {ko:"이 유튜버는 제주 출신이 아니다.", sentence:"This YouTuber is not from Jeju.", candidates:["is","not","from"]},
+  {ko:"그는 친구들과 트윗을 주고받았다.", sentence:"He tweeted with his friends.", candidates:["tweeted","with","his"]},
+  {ko:"그 아기는 영상에서 울었다.", sentence:"The baby cried in the video.", candidates:["cried","in","the"]},
+  {ko:"학교 브이로그가 많지 않다.", sentence:"There are not many school vlogs.", candidates:["There","are","not","many"]},
+  {ko:"미나는 유명한 유튜버이다.", sentence:"Mina is a famous YouTuber.", candidates:["is","a","famous"]},
+  {ko:"이곳은 사진을 찍기에 좋은 장소이다.", sentence:"This is a good place for pictures.", candidates:["is","a","good","for"]},
+  {ko:"그의 영상들은 재미있지 않다.", sentence:"His videos are not funny.", candidates:["are","not","funny"]},
+  {ko:"그녀는 인스타그램 사진에서 멋져 보인다.", sentence:"She looks cool in her Instagram photos.", candidates:["looks","cool","in","her"]},
+  {ko:"그들은 점점 인기를 얻고 있다.", sentence:"They are getting popular.", candidates:["are","getting","popular"]},
+  {ko:"그는 유명한 유튜버였다.", sentence:"He was a famous YouTuber.", candidates:["was","a","famous"]},
+  {ko:"그 노래는 틱톡에서 인기가 있다.", sentence:"The song is popular on TikTok.", candidates:["is","popular","on"]},
+  {ko:"그의 영상들은 항상 재미있다.", sentence:"His videos are always funny.", candidates:["are","always","funny"]},
+  {ko:"수민은 영상에서 멋져 보인다.", sentence:"Sumin looks good in the video.", candidates:["looks","good","in","the"]},
+  {ko:"Tom의 브이로그는 점점 지루해지고 있다.", sentence:"Tom's vlogs are getting boring.", candidates:["are","getting","boring"]}
+];
+const rows=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM"];
+const STORAGE_KEY="twoBlankLastChoices_v1";
+let index=0, locked=false, current=null, activeBlank=0;
+let typed=["",""];
+let blankState=["normal","normal"];
+let lastChoices=loadLastChoices();
+const el=id=>document.getElementById(id);
+const korean=el("korean"),sentence=el("sentence"),hint=el("hint"),step=el("step"),count=el("count"),progress=el("progress"),keyboard=el("keyboard");
+function loadLastChoices(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY));return Array.isArray(v)?v:[]}catch(e){return []}}
+function saveLastChoices(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(lastChoices))}catch(e){}}
+function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+function findWord(full,word){const re=new RegExp(`\\b${esc(word)}\\b`,"i");const m=re.exec(full);return m?{start:m.index,end:m.index+m[0].length,text:m[0]}:null}
+function chooseTwo(itemIndex){
+ const item=items[itemIndex], n=item.candidates.length;
+ const all=[]; for(let a=0;a<n;a++)for(let b=a+1;b<n;b++)all.push([a,b]);
+ const prev=lastChoices[itemIndex];
+ let pool=all.filter(p=>!prev || p[0]!==prev[0] || p[1]!==prev[1]); if(!pool.length)pool=all;
+ const pair=pool[Math.floor(Math.random()*pool.length)]; lastChoices[itemIndex]=pair; saveLastChoices();
+ const found=pair.map(i=>findWord(item.sentence,item.candidates[i])).filter(Boolean).sort((a,b)=>a.start-b.start);
+ return {sentence:item.sentence, blanks:found};
+}
+function buildKeyboard(){keyboard.innerHTML="";rows.forEach(r=>{const row=document.createElement("div");row.className="row";[...r].forEach(ch=>{const b=document.createElement("button");b.className="key";b.type="button";b.textContent=ch;b.addEventListener("click",()=>addLetter(ch.toLowerCase()));row.appendChild(b)});keyboard.appendChild(row)})}
+function renderSentence(){
+ sentence.innerHTML=""; let pos=0;
+ current.blanks.forEach((b,i)=>{sentence.append(document.createTextNode(current.sentence.slice(pos,b.start)));const s=document.createElement("span");let cls="blank";if(i===activeBlank&&!locked&&blankState[i]!=="correct")cls+=" active";if(blankState[i]==="wrong")cls+=" wrong";if(blankState[i]==="correct")cls+=" correct";s.className=cls;s.textContent=typed[i]||" ";s.style.minWidth=Math.max(80,(b.text.length+1)*22)+"px";sentence.appendChild(s);pos=b.end});
+ sentence.append(document.createTextNode(current.sentence.slice(pos)));
+}
+function loadQuestion(){locked=false;typed=["",""];blankState=["normal","normal"];activeBlank=0;current=chooseTwo(index);korean.textContent=items[index].ko;count.textContent=`${index+1} / ${items.length}`;progress.style.width=`${index/items.length*100}%`;step.textContent="첫 번째 빈칸을 입력하세요.";hint.textContent="아래 키보드의 알파벳을 눌러 두 빈칸을 완성하세요.";hint.className="hint";renderSentence()}
+function addLetter(ch){if(locked)return;const ans=current.blanks[activeBlank].text;if(typed[activeBlank].length>=ans.length)return;typed[activeBlank]+=ch;blankState[activeBlank]="normal";renderSentence();if(typed[activeBlank].length===ans.length)checkCurrentBlank()}
+function checkCurrentBlank(){const ans=current.blanks[activeBlank].text;if(typed[activeBlank].toLowerCase()===ans.toLowerCase()){blankState[activeBlank]="correct";typed[activeBlank]=ans;if(activeBlank===0){activeBlank=1;step.textContent="두 번째 빈칸을 입력하세요.";hint.textContent="좋아요! 이제 두 번째 빈칸을 완성하세요.";hint.className="hint good";renderSentence()}else{locked=true;renderSentence();hint.textContent="정답! 두 빈칸을 모두 완성했습니다.";hint.className="hint good";step.textContent="문장 완성!";progress.style.width=`${(index+1)/items.length*100}%`;setTimeout(()=>{index++;if(index>=items.length)finish();else loadQuestion()},900)}}else{blankState[activeBlank]="wrong";hint.textContent="이 빈칸이 맞지 않아요. 글자를 지우고 다시 입력하세요.";hint.className="hint bad";renderSentence()}}
+function backspace(){if(locked)return;if(typed[activeBlank]){typed[activeBlank]=typed[activeBlank].slice(0,-1);blankState[activeBlank]="normal"}else if(activeBlank===1){activeBlank=0;blankState[0]="normal";step.textContent="첫 번째 빈칸을 다시 확인하세요."}hint.textContent="아래 키보드의 알파벳을 눌러 빈칸을 완성하세요.";hint.className="hint";renderSentence()}
+function clearTyped(){if(locked)return;typed[activeBlank]="";blankState[activeBlank]="normal";hint.textContent="현재 빈칸을 다시 입력하세요.";hint.className="hint";renderSentence()}
+function finish(){el("quiz").hidden=true;el("done").hidden=false;count.textContent=`${items.length} / ${items.length}`;progress.style.width="100%"}
+function restart(){index=0;locked=false;current=null;activeBlank=0;typed=["",""];el("quiz").hidden=false;el("done").hidden=true;loadQuestion()}
+el("backBtn").addEventListener("click",backspace);el("clearBtn").addEventListener("click",clearTyped);el("restartBtn").addEventListener("click",restart);el("againBtn").addEventListener("click",restart);buildKeyboard();loadQuestion();
+</script>
+</body>
+</html>
