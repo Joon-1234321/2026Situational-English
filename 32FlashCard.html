@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Flashcards</title>
+  <style>
+    :root {
+      --ink: #1f2a44;
+      --muted: #6b7280;
+      --shadow: 0 12px 30px rgba(31,42,68,.10);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 5%, #e8e7ff 0, transparent 28%),
+        radial-gradient(circle at 92% 90%, #dff7e9 0, transparent 30%),
+        linear-gradient(135deg, #f6f8ff, #eef9f4);
+    }
+
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 28px 24px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    h1 { margin: 0; font-size: clamp(25px, 2.3vw, 38px); }
+    p { margin: 7px 0 0; color: var(--muted); font-size: clamp(13px, 1vw, 16px); }
+
+    .hint {
+      font-size: 13px;
+      color: #53627a;
+      background: rgba(255,255,255,.75);
+      padding: 9px 13px;
+      border-radius: 999px;
+    }
+
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      grid-template-rows: repeat(2, minmax(190px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 190px;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.96);
+      border-radius: 22px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 18px 14px;
+      overflow: hidden;
+      transition: opacity .22s ease;
+    }
+
+    .front {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .back {
+      opacity: 0;
+      pointer-events: none;
+      background: #f4f7ff;
+      background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--accent) 16%, white),
+        color-mix(in srgb, var(--accent) 7%, white)
+      );
+      border: 2px solid color-mix(in srgb, var(--accent) 34%, white);
+    }
+
+    .card.flipped .front {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card.flipped .back {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .front::before, .back::before {
+      content: "";
+      position: absolute;
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      top: -28px;
+      right: -18px;
+      background: var(--accent);
+      opacity: .12;
+    }
+
+    .front::after, .back::after {
+      content: "";
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      bottom: -18px;
+      left: -10px;
+      background: var(--accent);
+      opacity: .09;
+    }
+
+    .back::before { opacity: .23; }
+    .back::after { opacity: .16; }
+    .back .num { background: rgba(255,255,255,.86); }
+    .back .speaker { background: rgba(255,255,255,.72); }
+
+    .num {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--accent);
+      background: #fff;
+      padding: 6px 9px;
+      border-radius: 999px;
+    }
+
+    .word {
+      font-weight: 800;
+      font-size: clamp(23px, 2vw, 34px);
+      line-height: 1.08;
+      color: #18243d;
+      overflow-wrap: anywhere;
+    }
+
+    .speaker {
+      margin-top: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #f6f7fb;
+      color: var(--accent);
+      font-size: 17px;
+    }
+
+    .meaning {
+      font-weight: 800;
+      font-size: clamp(21px, 1.7vw, 30px);
+      line-height: 1.22;
+      color: #18243d;
+      word-break: keep-all;
+    }
+
+    .english-small {
+      margin-top: 9px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .card:focus-visible {
+      box-shadow: 0 0 0 4px rgba(59,130,246,.22), var(--shadow);
+    }
+
+    @media (max-width: 1050px) {
+      .grid { grid-template-columns: repeat(2,1fr); grid-template-rows: none; }
+      .card { min-height: 165px; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { padding: 16px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 155px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .face { transition-duration: .001ms; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <h1>English Flashcards</h1>
+        <p>카드를 클릭하면 영어를 읽어주고 뜻을 보여줍니다.</p>
+      </div>
+      <div class="hint">🔊 클릭할 때마다 발음 · 다시 클릭하면 영어</div>
+    </header>
+    <section class="grid" id="grid" aria-label="영어 단어 플래시카드 10개"></section>
+  </main>
+
+  <script>
+    const cards = [
+      { word: "writer", meaning: "작가", color: "#5B6CFF" },
+      { word: "interesting", meaning: "흥미로운 / 재미있는", color: "#FF6B8A" },
+      { word: "become", meaning: "~이 되다", color: "#F59E0B" },
+      { word: "about", meaning: "~에 관하여 / 약", color: "#8B5CF6" },
+      { word: "brave", meaning: "용감한", color: "#EF4444" },
+      { word: "long", meaning: "긴 / 오랫동안", color: "#10B981" },
+      { word: "rich", meaning: "부유한 / 풍부한", color: "#0EA5E9" },
+      { word: "England", meaning: "잉글랜드(영국)", color: "#14B8A6" },
+      { word: "children", meaning: "아이들 / 어린이들", color: "#6366F1" },
+      { word: "blue", meaning: "파란 / 파란색", color: "#EC4899" }
+    ];
+
+    const grid = document.getElementById("grid");
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = .82;
+      utterance.pitch = 1;
+      const voices = speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice =>
+        voice.lang === "en-US" && /Google|Microsoft|Samantha|Natural/i.test(voice.name)
+      ) || voices.find(voice => voice.lang === "en-US")
+        || voices.find(voice => voice.lang && voice.lang.startsWith("en"))
+        || null;
+      speechSynthesis.speak(utterance);
+    }
+
+    cards.forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.tabIndex = 0;
+      card.style.setProperty("--accent", item.color);
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `${item.word} 플래시카드`);
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="face front">
+            <span class="num">${String(index + 1).padStart(2,"0")}</span>
+            <div class="word">${item.word}</div>
+            <div class="speaker">🔊</div>
+          </div>
+          <div class="face back">
+            <span class="num">${String(index + 1).padStart(2,"0")}</span>
+            <div class="meaning">${item.meaning}</div>
+            <div class="english-small">${item.word}</div>
+            <div class="speaker">🔊</div>
+          </div>
+        </div>`;
+
+      const activate = () => {
+        speak(item.speech || item.word);
+        card.classList.toggle("flipped");
+      };
+
+      card.addEventListener("click", activate);
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activate();
+        }
+      });
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
+
+
