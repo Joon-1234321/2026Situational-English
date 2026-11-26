@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="영어 음성을 선택할 수 있는 맛과 음식 표현 플래시카드 10장">
+<title>맛과 음식 영어 플래시카드</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f6f2; color: #233b32; font-family: system-ui, sans-serif; }
+  main { max-width: 1024px; margin: auto; padding: clamp(16px, 4vw, 38px); }
+  header { margin-bottom: 22px; }
+  .tag { margin: 0 0 5px; color: #425d51; font-size: .875rem; font-weight: 700; }
+  h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); }
+  .guide { margin: 8px 0 0; color: #425d51; line-height: 1.6; word-break: keep-all; }
+  .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+  .card {
+    position: relative; display: grid; place-items: center;
+    width: 100%; height: 132px; padding: 27px 10px 14px;
+    background: #fff; border: 1px solid #b9c8c0; border-radius: 16px;
+  }
+  .card[data-side="back"] { background: #dcebe3; border-color: #88a89a; }
+  .side { position: absolute; top: 10px; left: 12px; color: #405e51; font-size: .8rem; }
+  .speaker { position: absolute; top: 8px; right: 10px; font-size: .9rem; }
+  .word { font-size: clamp(17px, 2.4vw, 23px); font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; }
+  .word:lang(ko) { font-size: clamp(15px, 2vw, 19px); }
+  .reset { margin-top: 16px; min-height: 44px; padding: 7px 14px; border: 1px solid #aabfb5; border-radius: 10px; background: #fff; }
+  .voice-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+  .voice-controls label { font-weight: 700; }
+  .voice-controls select, .voice-controls button {
+    min-height: 44px; max-width: 100%; min-width: 0; padding: 7px 12px;
+    border: 1px solid #aabfb5; border-radius: 10px; background: #fff; color: inherit; font: inherit;
+  }
+  .voice-controls select { width: min(365px, 100%); text-overflow: ellipsis; }
+  .voice-controls button:disabled { opacity: .6; cursor: default; }
+  button:focus-visible { outline: 3px solid #326d56; outline-offset: 2px; }
+  #audio-status { color: #425d51; line-height: 1.5; }
+  @media (max-width: 780px) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 490px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="tag">단어 10개 · 영어 음성 선택</p>
+    <h1>맛과 음식 영어 플래시카드</h1>
+    <p class="guide">카드를 누르면 발음이 나오고 우리말 뜻이 보여요. 다시 누르면 발음과 함께 영어가 나타나요.</p>
+  </header>
+  <div class="cards" id="cards" aria-label="맛과 음식 영어 카드 10장"></div>
+  <button class="reset" id="reset" type="button">모두 영어로 돌리기</button>
+  <div class="voice-controls">
+    <label for="voice-choice">영어 음성</label>
+    <select id="voice-choice"><option value="">자동</option></select>
+    <button id="voice-test" type="button">발음 확인</button>
+  </div>
+  <p id="audio-status" role="status"></p>
+</main>
+<template id="card-template">
+  <button type="button" class="card">
+    <span class="side"></span>
+    <span class="speaker" aria-hidden="true">🔊</span>
+    <span class="word"></span>
+  </button>
+</template>
+<script>
+  const words = [
+    ["taste","맛 / 맛보다 / 맛이 나다"],
+    ["sweet","달콤한"],
+    ["crispy","바삭바삭한"],
+    ["spicy","매운"],
+    ["smell","냄새 / 냄새가 나다 / 냄새를 맡다"],
+    ["greasy","기름진"],
+    ["side dish","곁들임 요리 / 반찬"],
+    ["salty","짠"],
+    ["sour","신 / 새콤한"],
+    ["delicious","맛있는"]
+  ];
+  const grid = document.getElementById("cards");
+  const template = document.getElementById("card-template");
+  const status = document.getElementById("audio-status");
+  const voicePicker = document.getElementById("voice-choice");
+  const preview = document.getElementById("voice-test");
+  const synth = window.speechSynthesis;
+  let speaking = null;
+  const settingsKey = "restaurant-flashcards-english-voice-v3";
+  const supported = !!synth && typeof window.SpeechSynthesisUtterance === "function";
+  let choice = "";
+  try { choice = localStorage.getItem(settingsKey) || ""; } catch {}
+
+  const key = voice => voice.voiceURI || voice.name;
+  // Match the automatic selection in 33FlashCard.html, including browser order.
+  function automaticVoice(voices) {
+    return voices.find(voice =>
+      voice.lang === "en-US" && /Google|Microsoft|Samantha|Natural/i.test(voice.name)
+    ) || voices.find(voice => voice.lang === "en-US")
+      || voices.find(voice => voice.lang && voice.lang.startsWith("en"))
+      || null;
+  }
+
+  function updateVoices() {
+    if (!supported) {
+      voicePicker.disabled = true;
+      preview.disabled = true;
+      status.textContent = "이 브라우저에서는 영어 음성을 재생할 수 없어요.";
+      return;
+    }
+    const available = synth.getVoices();
+    const voices = available.filter(voice => voice.lang && voice.lang.startsWith("en"));
+    const recommended = automaticVoice(available);
+    voicePicker.replaceChildren(new Option(recommended
+      ? "자동 · " + recommended.name
+      : "자동 · 브라우저 기본", ""));
+    voices.forEach(voice => voicePicker.add(new Option(
+      voice.name + " (" + voice.lang + ")", key(voice))));
+    voicePicker.value = voices.some(voice => key(voice) === choice) ? choice : "";
+    voicePicker.disabled = voices.length === 0;
+  }
+
+  function speak(text) {
+    if (!supported) return;
+    status.textContent = "";
+    const utterance = new window.SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.82;
+    utterance.pitch = 1;
+    const available = synth.getVoices();
+    const manualVoice = choice && available.find(voice =>
+      voice.lang && voice.lang.startsWith("en") && key(voice) === choice
+    );
+    utterance.voice = manualVoice || automaticVoice(available);
+    speaking = utterance;
+    utterance.onend = () => { if (speaking === utterance) speaking = null; };
+    utterance.onerror = event => {
+      if (speaking !== utterance) return;
+      speaking = null;
+      if (event.error === "canceled" || event.error === "interrupted") return;
+      status.textContent = "선택한 음성을 재생하지 못했어요. 인터넷 연결을 확인하거나 다른 영어 음성을 선택해 주세요.";
+    };
+    try { synth.cancel(); synth.speak(utterance); }
+    catch {
+      speaking = null;
+      status.textContent = "선택한 음성을 재생하지 못했어요. 다른 영어 음성을 선택해 주세요.";
+    }
+  }
+
+  if (supported) synth.addEventListener("voiceschanged", updateVoices);
+  updateVoices();
+  voicePicker.addEventListener("change", () => {
+    speaking = null;
+    if (supported) synth.cancel();
+    choice = voicePicker.value;
+    try { localStorage.setItem(settingsKey, choice); } catch {}
+    status.textContent = "";
+  });
+  preview.addEventListener("click", () => speak("The side dish is delicious."));
+
+  function show(card, en, ko, back) {
+    card.dataset.side = back ? "back" : "front";
+    card.querySelector(".side").textContent = back ? "우리말" : "영어";
+    const word = card.querySelector(".word");
+    word.lang = back ? "ko" : "en";
+    word.textContent = back ? ko : en;
+  }
+
+  const cards = words.map(([en, ko]) => {
+    const card = template.content.firstElementChild.cloneNode(true);
+    show(card, en, ko, false);
+    card.addEventListener("click", () => {
+      show(card, en, ko, card.dataset.side !== "back");
+      speak(en);
+    });
+    grid.append(card);
+    return [card, en, ko];
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    speaking = null;
+    if (supported) synth.cancel();
+    cards.forEach(([card, en, ko]) => show(card, en, ko, false));
+    status.textContent = "";
+  });
+</script>
+</body>
+</html>
